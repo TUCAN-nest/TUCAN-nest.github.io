@@ -1,6 +1,6 @@
 <html>
   <head>
-    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
     <script src="https://unpkg.com/openchemlib@7.4.1/dist/openchemlib-full.js"></script>
 
     <py-env>
@@ -18,7 +18,9 @@
       }
 
       function getMolfileFromEditor() {
-        let molecule = editor.getMolecule();
+        let origMol = editor.getMolecule();
+        let molecule = new OCL.Molecule(origMol.getAllAtoms(), origMol.getAllBonds());
+        origMol.copyMolecule(molecule);
         molecule.addImplicitHydrogens();
         return molecule.toMolfileV3();
       }
@@ -36,7 +38,7 @@
       def graph_from_molfile(molfile: str) -> nx.Graph:
         element_symbols, bonds = _parse_molfile3000(molfile)
         return graph_from_moldata(element_symbols, bonds)
-  
+
       def serialize(m):
         return serialize_molecule(canonicalize_molecule(m))
 
