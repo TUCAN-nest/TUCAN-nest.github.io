@@ -1,13 +1,15 @@
 <html>
   <head>
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
-    <script src="https://unpkg.com/openchemlib@7.4.1/dist/openchemlib-full.js"></script>
-
-    <py-env>
-      - nx
-# non-pure wheel     - https://files.pythonhosted.org/packages/60/d0/d7e0dacb4f57d76b48f226dff89006afec394e96b8092ec8fd777b18e836/igraph-0.9.11-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-      - TUCAN/dist/tucan-0.1.0-py2.py3-none-any.whl
-    </py-env>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.21.1/full/pyodide.js"></script>
+    <script src="https://unpkg.com/openchemlib@8.0.1/dist/openchemlib-full.js"></script>
+    <style>
+      .row {
+        display: flex;
+      }
+      .column {
+        flex: 50%;
+      }
+    </style>
   </head>
   <body onload="startEditor()">
     <script type="text/javascript">
@@ -24,45 +26,52 @@
         molecule.addImplicitHydrogens();
         return molecule.toMolfileV3();
       }
+
+      async function startPyodide() {
+        let pyodide = await loadPyodide();
+        await pyodide.loadPackage("micropip");
+        const micropip = pyodide.pyimport("micropip");
+        await micropip.install("texttable");
+
+        let packages = [
+          "networkx",
+          "http://127.0.0.1:8000/dist/igraph-0.9.11-cp310-cp310-emscripten_3_1_14_wasm32.whl",
+          "http://127.0.0.1:8000/dist/tucan-0.1.0-py2.py3-none-any.whl"
+        ];
+        await pyodide.loadPackage(packages);
+
+        console.log("Pyodide is ready!");
+        return pyodide;
+      }
+      var pyodidePromise = startPyodide();
+
+      async function loadTucanwebPy() {
+        let pyodide = await pyodidePromise;
+        return pyodide.runPython(await (await fetch("tucanweb.py")).text());
+      }
+      var molfile_to_tucanPromise = loadTucanwebPy();
+
+      function reloadTucanwebPy() {
+        molfile_to_tucanPromise = loadTucanwebPy();
+      }
+
+      async function convertToTucan(molfile) {
+        let molfile_to_tucan = await molfile_to_tucanPromise;
+        let tucan = molfile_to_tucan(molfile);
+        document.getElementById("tucantext").innerHTML = tucan;
+      }
     </script>
 
-    <py-script>
-      from tucan.canonicalization import canonicalize_molecule
-      from tucan.serialization import serialize_molecule
-      from tucan.io import _parse_molfile3000, graph_from_moldata
-      import networkx as nx
-
-      from pyodide import create_proxy
-      import js
-
-      def graph_from_molfile(molfile: str) -> nx.Graph:
-        element_symbols, bonds = _parse_molfile3000(molfile)
-        return graph_from_moldata(element_symbols, bonds)
-
-      def serialize(m):
-        return serialize_molecule(canonicalize_molecule(m))
-
-      def molfile_to_tucan():
-        document.getElementById("text").innerHTML = ""
-
-        molfile = js.getMolfileFromEditor()
-        graph = graph_from_molfile(molfile)
-
-        if list(graph.edges):
-          document.getElementById("text").innerHTML = serialize(graph)
-
-      def click_button(event):
-        molfile_to_tucan()
-
-      def setup():
-        click_proxy = create_proxy(click_button)
-        document.getElementById("button").addEventListener("click", click_proxy)
-
-      setup()
-    </py-script>
-
-    <div id="editor" style="width:400px;height:400px;border:solid;border-width:1px;"></div>
-    <button id="button" type="button">Convert molecule to TUCAN</button>
-    <pre id="text" style="white-space: pre-wrap;"></pre>
+    <div class="row">
+      <div class="column">
+        <div id="editor" style="width:400px;height:400px;border:solid;border-width:1px;"></div>
+        <button onclick="convertToTucan(getMolfileFromEditor())">Convert molecule in editor to TUCAN</button>
+      </div>
+      <div class="column">
+        <textarea id="textarea" style="height:400px;width:75%;" placeholder="Molfile V3000"></textarea>
+        <button onclick="convertToTucan(document.getElementById('textarea').value)">Convert Molfile in text field to TUCAN</button>
+      </div>
+    </div>
+    <pre id="tucantext" style="white-space: pre-wrap;"></pre>
   </body>
 </html>
