@@ -10,4 +10,4 @@
 - Build the igraph wheel: not yet automated, see [python-igraph#560](https://github.com/igraph/python-igraph/issues/560)
 
 ## Limitations / Problems
-- The TUCAN library needs to be distributed via the local web server due to CORS policies.
+- The additional Python wheels need to be distributed via the local web server due to CORS policies.
