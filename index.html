@@ -46,8 +46,8 @@
       var pyodidePromise = startPyodide();
 
       async function loadTucanwebPy() {
-        let pyodide = await pyodidePromise;
-        return pyodide.runPython(await (await fetch("tucanweb.py")).text());
+        let [pyodide, code] = await Promise.all([pyodidePromise, (await fetch("tucanweb.py")).text()]);
+        return pyodide.runPythonAsync(code);
       }
       var molfile_to_tucanPromise = loadTucanwebPy();
 
@@ -69,6 +69,7 @@
       </div>
       <div class="column">
         <textarea id="textarea" style="height:400px;width:75%;" placeholder="Molfile V3000"></textarea>
+        <br>
         <button onclick="convertToTucan(document.getElementById('textarea').value)">Convert Molfile in text field to TUCAN</button>
       </div>
     </div>
