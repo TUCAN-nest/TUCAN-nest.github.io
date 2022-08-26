@@ -13,7 +13,7 @@ def serialize(m):
 def molfile_to_tucan(molfile):
   graph = graph_from_molfile_text(molfile)
   result = ""
-  if list(graph.edges):
+  if list(graph.nodes):
     result = serialize(graph)
   return to_js(result)
 
