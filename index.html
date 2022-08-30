@@ -76,7 +76,7 @@
           let tucan = molfile_to_tucan(molfile);
           writeOutputText(tucan);
         } catch (e) {
-          console.log(e);
+          console.error(e);
           writeOutputText("An error occured during the serialization to TUCAN. This might be due to an incorrect V3000 Molfile. Check your browser console (F12) for details.");
         }
       }
@@ -91,18 +91,18 @@
     <noscript>You need to enable JavaScript!</noscript>
     <div class="row">
       <div class="column">
-        <div id="editor" style="width:400px;height:400px;border:solid;border-width:1px;"></div>
-        <div>
-          <button id="btnConvertEditor" onclick="convertToTucan(getMolfileFromEditor())" disabled="true">Convert molecule in editor to TUCAN</button>
-        </div>
+        <div id="editor" style="width:406px;height:406px;border:solid;border-width:1px;"></div>
       </div>
       <div class="column">
-        <div>
-          <textarea id="textarea" style="height:400px;width:75%;resize:none;" placeholder="Molfile V3000"></textarea>
-        </div>
-        <div>
-          <button id="btnConvertMolfile" onclick="convertToTucan(document.getElementById('textarea').value)" disabled="true">Convert Molfile in text field to TUCAN</button>
-        </div>
+        <textarea id="textarea" style="height:400px;width:75%;resize:none;" placeholder="Molfile V3000"></textarea>
+      </div>
+    </div>
+    <div class="row">
+      <div class="column">
+        <button id="btnConvertEditor" onclick="convertToTucan(getMolfileFromEditor())" disabled="true">Convert molecule in editor to TUCAN</button>
+      </div>
+      <div class="column">
+        <button id="btnConvertMolfile" onclick="convertToTucan(document.getElementById('textarea').value)" disabled="true">Convert Molfile in text field to TUCAN</button>
       </div>
     </div>
     <pre id="outputtext" style="white-space: pre-wrap;user-select: all;"></pre>
