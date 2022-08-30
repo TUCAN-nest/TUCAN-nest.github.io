@@ -72,8 +72,13 @@
 
       async function convertToTucan(molfile) {
         let molfile_to_tucan = await molfile_to_tucanPromise;
-        let tucan = molfile_to_tucan(molfile);
-        writeOutputText(tucan);
+        try {
+          let tucan = molfile_to_tucan(molfile);
+          writeOutputText(tucan);
+        } catch (e) {
+          console.log(e);
+          writeOutputText("An error occured during the serialization to TUCAN. This might be due to an incorrect V3000 Molfile. Check your browser console (F12) for details.");
+        }
       }
 
       function writeOutputText(text) {

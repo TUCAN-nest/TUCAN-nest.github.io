@@ -11,10 +11,12 @@ def serialize(m):
 
 # see https://pyodide.org/en/stable/usage/type-conversions.html#calling-python-objects-from-javascript
 def molfile_to_tucan(molfile):
-  graph = graph_from_molfile_text(molfile)
   result = ""
-  if list(graph.nodes):
-    result = serialize(graph)
+  if molfile:
+    graph = graph_from_molfile_text(molfile)
+    if list(graph.nodes):
+      result = serialize(graph)
+
   return to_js(result)
 
 molfile_to_tucan
