@@ -1,6 +1,6 @@
 <html>
   <head>
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.21.1/full/pyodide.js"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.21.2/full/pyodide.js"></script>
     <script src="https://unpkg.com/openchemlib@8.0.1/dist/openchemlib-full.js"></script>
     <style>
       .row {
@@ -35,8 +35,8 @@
 
         let packages = [
           "networkx",
-          "http://127.0.0.1:8000/dist/igraph-0.9.11-cp310-cp310-emscripten_3_1_14_wasm32.whl",
-          "http://127.0.0.1:8000/dist/tucan-0.1.0-py2.py3-none-any.whl"
+          "dist/igraph-0.9.11-cp310-cp310-emscripten_3_1_14_wasm32.whl",
+          "dist/tucan-0.1.0-py2.py3-none-any.whl"
         ];
         await pyodide.loadPackage(packages);
 
