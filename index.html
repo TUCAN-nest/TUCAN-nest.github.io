@@ -13,6 +13,25 @@
       .column {
         flex: 50%;
       }
+      body {
+        margin-left: 0px;
+        margin-right: 0px;
+      }
+      .content {
+        margin-left: 8px;
+        margin-right: 8px;
+        margin-bottom: 50px;
+      }
+      footer {
+        position: fixed;
+        height: 30px;
+        padding-top: 15px;
+        bottom: 0;
+        width: 100%;
+        background: #f2f2f2;
+        border-top: 1px solid #e4e4e4;
+        text-align: center;
+      }
     </style>
   </head>
   <body onload="onBodyload()">
@@ -88,23 +107,31 @@
       molfile_to_tucanPromise.then(() => onFinishLoad());
     </script>
 
-    <noscript>You need to enable JavaScript!</noscript>
-    <div class="row">
-      <div class="column">
-        <div id="editor" style="width:406px;height:406px;border:solid;border-width:1px;"></div>
+    <div class="content">
+      <noscript>You need to enable JavaScript!</noscript>
+      <div class="row">
+        <div class="column">
+          <div id="editor" style="width:406px;height:406px;border:solid;border-width:1px;"></div>
+        </div>
+        <div class="column">
+          <textarea id="textarea" style="height:400px;width:75%;resize:none;" placeholder="Molfile V3000"></textarea>
+        </div>
       </div>
-      <div class="column">
-        <textarea id="textarea" style="height:400px;width:75%;resize:none;" placeholder="Molfile V3000"></textarea>
+      <div class="row">
+        <div class="column">
+          <button id="btnConvertEditor" onclick="convertToTucan(getMolfileFromEditor())" disabled="true">Convert molecule in editor to TUCAN</button>
+        </div>
+        <div class="column">
+          <button id="btnConvertMolfile" onclick="convertToTucan(document.getElementById('textarea').value)" disabled="true">Convert Molfile in text field to TUCAN</button>
+        </div>
       </div>
+      <pre id="outputtext" style="white-space: pre-wrap;user-select: all;"></pre>
     </div>
-    <div class="row">
-      <div class="column">
-        <button id="btnConvertEditor" onclick="convertToTucan(getMolfileFromEditor())" disabled="true">Convert molecule in editor to TUCAN</button>
+    <footer>
+      <div style="text-align: center;">
+        <a href="https://github.com/TUCAN-nest/TUCAN" style="margin-left: 10px">TUCAN GitHub Project</a>
+        <a href="https://github.com/TUCAN-nest/TUCAN/issues" style="margin-left: 10px">Issues</a>
       </div>
-      <div class="column">
-        <button id="btnConvertMolfile" onclick="convertToTucan(document.getElementById('textarea').value)" disabled="true">Convert Molfile in text field to TUCAN</button>
-      </div>
-    </div>
-    <pre id="outputtext" style="white-space: pre-wrap;user-select: all;"></pre>
+    </footer>
   </body>
 </html>
