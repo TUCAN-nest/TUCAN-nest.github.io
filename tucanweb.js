@@ -62,7 +62,7 @@ async function convertToTucan(molfile) {
     writeOutputText(tucan);
   } catch (e) {
     console.error(e);
-    writeOutputText("An error occured during the serialization to TUCAN. This might be due to an incorrect V3000 Molfile. Check your browser console (F12) for details.");
+    writeOutputText("An error occured during the serialization to TUCAN. This might be due to an incorrect Molfile. Check your browser console (F12) for details.");
   }
 }
 
@@ -71,3 +71,45 @@ function writeOutputText(text) {
 }
 
 molfile_to_tucanPromise.then(() => onFinishLoad());
+
+function onTextareaDragover(event) {
+  event.stopPropagation();
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'copy';
+}
+
+async function onTextareaDrop(event) {
+  event.stopPropagation();
+  event.preventDefault();
+
+  const content = await extractContent(event.dataTransfer);
+  if (!content) {
+    return;
+  }
+
+  // make sure we only insert V3000 Molfiles
+  const lines = content.match(/[^\r\n]+/g);
+  if (!lines[2].endsWith("V3000")) {
+    console.log("You may only drag-and-drop V3000 Molfiles!")
+    return;
+  }
+
+  document.getElementById("textarea").value = content;
+}
+
+async function extractContent(dataTransfer) {
+  const items = dataTransfer.items;
+  if (!items || items.length == 0) {
+    return null;
+  }
+  const item = items[0];
+
+  if (item.kind === "file") {
+    return await item.getAsFile().text();
+  } else if (item.kind === "string") {
+    return new Promise(resolve => {
+      item.getAsString(data => resolve(data));
+    });
+  }
+  return null;
+}
