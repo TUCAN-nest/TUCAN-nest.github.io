@@ -12,20 +12,20 @@ function startEditor() {
 }
 
 function getMolfileFromEditor() {
-  let origMol = editor.getMolecule();
-  let molecule = new OCL.Molecule(origMol.getAllAtoms(), origMol.getAllBonds());
+  const origMol = editor.getMolecule();
+  const molecule = new OCL.Molecule(origMol.getAllAtoms(), origMol.getAllBonds());
   origMol.copyMolecule(molecule);
   molecule.addImplicitHydrogens();
   return molecule.toMolfileV3();
 }
 
 async function startPyodide() {
-  let pyodide = await loadPyodide();
+  const pyodide = await loadPyodide();
   await pyodide.loadPackage("micropip");
   const micropip = pyodide.pyimport("micropip");
   await micropip.install("texttable");
 
-  let packages = [
+  const packages = [
     "networkx",
     "dist/igraph-0.9.11-cp310-cp310-emscripten_3_1_14_wasm32.whl",
     "dist/tucan-0.1.0-py2.py3-none-any.whl"
@@ -39,7 +39,7 @@ async function startPyodide() {
 var pyodidePromise = startPyodide();
 
 async function loadTucanwebPy() {
-  let [pyodide, code] = await Promise.all([pyodidePromise, (await fetch("tucanweb.py")).text()]);
+  const [pyodide, code] = await Promise.all([pyodidePromise, (await fetch("tucanweb.py")).text()]);
   return pyodide.runPythonAsync(code);
 }
 
@@ -56,9 +56,9 @@ function onFinishLoad() {
 }
 
 async function convertToTucan(molfile) {
-  let molfile_to_tucan = await molfile_to_tucanPromise;
+  const molfile_to_tucan = await molfile_to_tucanPromise;
   try {
-    let tucan = molfile_to_tucan(molfile);
+    const tucan = molfile_to_tucan(molfile);
     writeOutputText(tucan);
   } catch (e) {
     console.error(e);
