@@ -87,6 +87,7 @@ async function convertFromTextarea() {
 }
 
 async function convertToTucan(molfilePromise, outputPreId) {
+  writeTucan("", outputPreId);
   const molfile_to_tucan = await molfile_to_tucanPromise;
   try {
     const tucan = molfile_to_tucan(await molfilePromise);
