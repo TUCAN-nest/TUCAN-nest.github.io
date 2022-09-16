@@ -1,22 +1,41 @@
 "use strict";
 
-function onBodyload() {
-  startEditor();
-  writeOutputText("Loading Pyodide and the TUCAN package. This may take a few seconds ...");
+function onBodyLoad() {
+  writeLog("Loading Pyodide and the TUCAN package. This may take a few seconds ...");
 }
 
-var editor;
-
-function startEditor() {
-  editor = window.OCL.StructureEditor.createSVGEditor("editor", 1);
+function getKetcher() {
+  return document.getElementById("ketcher").contentWindow.ketcher;
 }
 
-function getMolfileFromEditor() {
-  const origMol = editor.getMolecule();
-  const molecule = new OCL.Molecule(origMol.getAllAtoms(), origMol.getAllBonds());
-  origMol.copyMolecule(molecule);
-  molecule.addImplicitHydrogens();
-  return molecule.toMolfileV3();
+function onKetcherLoaded() {
+  // Chrome fires the onload event too early, so we might need to wait until 'ketcher' exists.
+  const ketcher = getKetcher();
+  if (ketcher) {
+    ketcher.editor.subscribe("change", data => onChangeInKetcher());
+  } else {
+    setTimeout(() => onKetcherLoaded(), 0);
+  }
+}
+
+function onChangeInKetcher() {
+  if (getKetcher().editor.struct().isBlank()) {
+    writeTucan("", "tucanFromEditor");
+  }
+}
+
+async function getMolfileFromKetcher() {
+  let molfile = await getKetcher().getMolfile("v3000");
+  if (document.getElementById("addImplicitHydrogensCheckbox").checked) {
+    molfile = addHsToMolfile(molfile);
+  }
+  return molfile;
+}
+
+function addHsToMolfile(molfile) {
+  const molObj = OCL.Molecule.fromMolfile(molfile);
+  molObj.addImplicitHydrogens();
+  return molObj.toMolfileV3();
 }
 
 async function startPyodide() {
@@ -52,22 +71,38 @@ function reloadTucanwebPy() {
 function onFinishLoad() {
   document.getElementById("btnConvertEditor").disabled = false;
   document.getElementById("btnConvertMolfile").disabled = false;
-  writeOutputText("Python environment was loaded. Have fun with TUCAN!");
+  writeLog("Python environment was loaded. Have fun with TUCAN!");
 }
 
-async function convertToTucan(molfile) {
+async function convertFromEditor() {
+  document.getElementById("btnConvertEditor").disabled = true;
+  convertToTucan(await getMolfileFromKetcher(), "tucanFromEditor");
+  document.getElementById("btnConvertEditor").disabled = false;
+}
+
+async function convertFromTextarea() {
+  document.getElementById("btnConvertMolfile").disabled = true;
+  convertToTucan(Promise.resolve(document.getElementById("textarea").value), "tucanFromMolfile")
+  document.getElementById("btnConvertMolfile").disabled = false;
+}
+
+async function convertToTucan(molfilePromise, outputPreId) {
   const molfile_to_tucan = await molfile_to_tucanPromise;
   try {
-    const tucan = molfile_to_tucan(molfile);
-    writeOutputText(tucan);
+    const tucan = molfile_to_tucan(await molfilePromise);
+    writeTucan(tucan, outputPreId);
   } catch (e) {
     console.error(e);
-    writeOutputText("An error occured during the serialization to TUCAN. This might be due to an incorrect Molfile. Check your browser console (F12) for details.");
+    writeLog("An error occured during the serialization to TUCAN. This might be due to an incorrect Molfile. Check your browser console (F12) for details.");
   }
 }
 
-function writeOutputText(text) {
-  document.getElementById("outputtext").innerHTML = text;
+function writeTucan(tucan, id) {
+  document.getElementById(id).innerHTML = tucan;
+}
+
+function writeLog(text) {
+  document.getElementById("log").innerHTML = new Date().toLocaleTimeString() + ": " + text;
 }
 
 molfile_to_tucanPromise.then(() => onFinishLoad());
@@ -89,8 +124,8 @@ async function onTextareaDrop(event) {
 
   // make sure we only insert V3000 Molfiles
   const lines = content.match(/[^\r\n]+/g);
-  if (!lines[2].endsWith("V3000")) {
-    console.log("You may only drag-and-drop V3000 Molfiles!")
+  if (lines.length < 3 || !lines[2].endsWith("V3000")) {
+    writeLog("Drag-and-drop: You may only drag-and-drop V3000 Molfiles.")
     return;
   }
 
