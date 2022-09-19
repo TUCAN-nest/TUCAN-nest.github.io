@@ -13,6 +13,7 @@ function onKetcherLoaded() {
   const ketcher = getKetcher();
   if (ketcher) {
     ketcher.editor.subscribe("change", data => onChangeInKetcher());
+    ketcher.editor.options({"showHydrogenLabels":"Hetero"});
   } else {
     setTimeout(() => onKetcherLoaded(), 0);
   }
