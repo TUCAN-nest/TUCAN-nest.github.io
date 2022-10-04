@@ -13,7 +13,7 @@ function onKetcher1Loaded() {
   const ketcher = getKetcher("ketcher1");
   if (ketcher) {
     ketcher.editor.subscribe("change", data => onChangeInKetcher1());
-    ketcher.editor.options({"showHydrogenLabels":"Hetero"});
+    ketcher.editor.options({"showHydrogenLabels":"off"});
   } else {
     setTimeout(() => onKetcher1Loaded(), 0);
   }
@@ -25,7 +25,7 @@ function onChangeInKetcher1() {
   }
 }
 
-async function getMolfileFromKetcher() {
+async function getMolfileFromKetcher1() {
   let molfile = await getKetcher("ketcher1").getMolfile("v3000");
   if (document.getElementById("addImplicitHydrogensCheckbox").checked) {
     molfile = addHsToMolfile(molfile);
@@ -37,6 +37,15 @@ function addHsToMolfile(molfile) {
   const molObj = OCL.Molecule.fromMolfile(molfile);
   molObj.addImplicitHydrogens();
   return molObj.toMolfileV3();
+}
+
+function onKetcher2Loaded() {
+  const ketcher = getKetcher("ketcher2");
+  if (ketcher) {
+    ketcher.editor.options({"showHydrogenLabels":"off"});
+  } else {
+    setTimeout(() => onKetcher2Loaded(), 0);
+  }
 }
 
 async function setMoleculeInKetcher2(molfile) {
@@ -87,7 +96,7 @@ function onFinishLoad() {
 
 async function convertMolfileFromEditor() {
   document.getElementById("btnConvertMolfileFromEditor").disabled = true;
-  molfileToTucan(await getMolfileFromKetcher(), "tucanFromEditor");
+  molfileToTucan(await getMolfileFromKetcher1(), "tucanFromEditor");
   document.getElementById("btnConvertMolfileFromEditor").disabled = false;
 }
 
