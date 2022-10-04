@@ -16,31 +16,37 @@
     <div class="container mb-5">
       <div class="row mt-1">
         <img class="col-3" src="https://raw.githubusercontent.com/TUCAN-nest/TUCAN/HEAD/logo.png">
-        <h1 class="col-9 mt-auto">Convert to TUCAN</h1>
+        <h1 class="col-9 mt-auto">Converters</h1>
       </div>
       <noscript>You need to enable JavaScript!</noscript>
 
       <ul class="nav nav-tabs mt-3" role="tablist">
         <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="draw-tab" data-bs-toggle="tab" data-bs-target="#draw-tab-pane" type="button" role="tab" aria-controls="draw-tab-pane" aria-selected="true">Draw structure and convert</button>
+          <button class="nav-link active" id="tab1" data-bs-toggle="tab" data-bs-target="#tab1-pane" type="button" role="tab" aria-controls="tab1-pane" aria-selected="true">Draw structure and convert to TUCAN</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="molfile-tab" data-bs-toggle="tab" data-bs-target="#molfile-tab-pane" type="button" role="tab" aria-controls="molfile-tab-pane" aria-selected="false">Convert from Molfile</button>
+          <button class="nav-link" id="tab2" data-bs-toggle="tab" data-bs-target="#tab2-pane" type="button" role="tab" aria-controls="tab2-pane" aria-selected="false">Convert Molfile to TUCAN</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab3" data-bs-toggle="tab" data-bs-target="#tab3-pane" type="button" role="tab" aria-controls="tab3-pane" aria-selected="false">Convert TUCAN to structure</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab4" data-bs-toggle="tab" data-bs-target="#tab4-pane" type="button" role="tab" aria-controls="tab4-pane" aria-selected="false">Convert TUCAN to Molfile</button>
         </li>
       </ul>
 
       <div class="tab-content">
-        <div class="tab-pane fade show active" id="draw-tab-pane" role="tabpanel" aria-labelledby="draw-tab" tabindex="0">
+        <div class="tab-pane fade show active" id="tab1-pane" role="tabpanel" aria-labelledby="tab1" tabindex="0">
           <div class="row mt-1">
             <div class="col-lg-8">
-              <iframe id="ketcher" class="w-100" src="ketcher2/ketcher.html" height="450" onload="onKetcherLoaded()"></iframe>
+              <iframe id="ketcher1" class="w-100" src="ketcher2/ketcher.html" height="450" onload="onKetcher1Loaded()"></iframe>
             </div>
             <div class="col-lg-4 mt-auto">
               <div class="form-check mb-3">
                 <input id="addImplicitHydrogensCheckbox" class="form-check-input" type="checkbox" value="" checked>
                 <label class="form-check-label" for="addImplicitHydrogensCheckbox">Add implicit hydrogens</label>
               </div>
-              <button id="btnConvertEditor" class="btn btn-outline-secondary" onclick="convertFromEditor()" disabled="false">Convert to TUCAN</button>
+              <button id="btnConvertMolfileFromEditor" class="btn btn-outline-secondary" onclick="convertMolfileFromEditor()" disabled="false">Convert to TUCAN</button>
             </div>
           </div>
           <div class="row mt-3 border rounded bg-light" style="--bs-bg-opacity:.3;">
@@ -51,16 +57,16 @@
           </div>
         </div>
 
-        <div class="tab-pane fade" id="molfile-tab-pane" role="tabpanel" aria-labelledby="molfile-tab" tabindex="0">
+        <div class="tab-pane fade" id="tab2-pane" role="tabpanel" aria-labelledby="tab2" tabindex="0">
           <div class="row mt-1">
             <div class="col-lg-8">
               <div class="w-100" style="display:inline-block;position:relative;">
-                <textarea id="textarea" class="form-control" style="height:450px;resize:none;" placeholder="Paste or drag-and-drop a Molfile V3000 here" ondragover="onTextareaDragover(event)" ondrop="onTextareaDrop(event)"></textarea>
-                <button class="btn btn-outline-secondary border-0" style="position:absolute;top:10px;right:10px;" onclick="document.getElementById('textarea').value = '';writeTucan('', 'tucanFromMolfile')"><i class="bi bi-trash"></i></button>
+                <textarea id="molfileTextarea" class="form-control" style="height:450px;resize:none;" placeholder="Paste or drag-and-drop a Molfile V3000 here" ondragover="onTextareaDragover(event)" ondrop="onMolfileTextareaDrop(event)"></textarea>
+                <button class="btn btn-outline-secondary border-0" style="position:absolute;top:10px;right:10px;" onclick="document.getElementById('molfileTextarea').value = '';writeResult('', 'tucanFromMolfile')"><i class="bi bi-trash"></i></button>
               </div>
             </div>
             <div class="col-lg-4 mt-auto">
-              <button id="btnConvertMolfile" class="btn btn-outline-secondary" onclick="convertFromTextarea()" disabled="true">Convert to TUCAN</button>
+              <button id="btnConvertMolfileFromTextarea" class="btn btn-outline-secondary" onclick="convertMolfileFromTextarea()" disabled="true">Convert to TUCAN</button>
             </div>
           </div>
           <div class="row mt-3 border rounded bg-light" style="--bs-bg-opacity:.3;">
@@ -70,6 +76,46 @@
             <pre id="tucanFromMolfile" class="py-3 px-3 mb-0" style="white-space:pre-wrap;user-select:all;"></pre>
           </div>
         </div>
+
+        <div class="tab-pane fade" id="tab3-pane" role="tabpanel" aria-labelledby="tab3" tabindex="0">
+          <div class="row mt-1">
+            <div class="col-lg-8">
+              <div class="w-100" style="display:inline-block;position:relative;">
+                <textarea id="tucanTextarea1" class="form-control" style="height:150px;resize:none;" placeholder="Paste or drag-and-drop a TUCAN here"></textarea>
+                <button class="btn btn-outline-secondary border-0" style="position:absolute;top:10px;right:10px;" onclick="document.getElementById('tucanTextarea1').value = '';clearKetcher2()"><i class="bi bi-trash"></i></button>
+              </div>
+            </div>
+            <div class="col-lg-4 mt-auto">
+              <button id="btnConvertTucanToMolfileInEditor" class="btn btn-outline-secondary" onclick="convertTucanToMolfileInEditor()" disabled="true">TUCAN to structure</button>
+            </div>
+          </div>
+          <div class="row mt-3">
+            <div class="col-lg-8">
+              <iframe id="ketcher2" class="w-100" src="ketcher2/ketcher.html" height="450"></iframe>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab4-pane" role="tabpanel" aria-labelledby="tab4" tabindex="0">
+          <div class="row mt-1">
+            <div class="col-lg-8">
+              <div class="w-100" style="display:inline-block;position:relative;">
+                <textarea id="tucanTextarea2" class="form-control" style="height:150px;resize:none;" placeholder="Paste or drag-and-drop a TUCAN here"></textarea>
+                <button class="btn btn-outline-secondary border-0" style="position:absolute;top:10px;right:10px;" onclick="document.getElementById('tucanTextarea2').value = '';writeResult('', 'molfileFromTucan')"><i class="bi bi-trash"></i></button>
+              </div>
+            </div>
+            <div class="col-lg-4 mt-auto">
+              <button id="btnConvertTucanToMolfileInTextarea" class="btn btn-outline-secondary" onclick="convertTucanToMolfileInTextarea()" disabled="true">Convert to TUCAN</button>
+            </div>
+          </div>
+          <div class="row mt-3 border rounded bg-light" style="--bs-bg-opacity:.3;">
+            <div class="border-bottom py-1 px-3">
+              <small class="font-monospace">Generated Molfile</small>
+            </div>
+            <pre id="molfileFromTucan" class="py-3 px-3 mb-0" style="white-space:pre-wrap;user-select:all;"></pre>
+          </div>
+        </div>
+
       </div>
 
       <div class="row mt-3 border rounded bg-light" style="--bs-bg-opacity:.3;">
@@ -78,7 +124,6 @@
         </div>
         <pre id="log" class="py-3 px-3 mb-0" style="white-space:pre-wrap"></pre>
       </div>
-
     </div>
     <footer class="footer mt-auto py-3 bg-light" style="position:fixed;bottom:0;text-align:center;width:100%;">
       <div style="container">
