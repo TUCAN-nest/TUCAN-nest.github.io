@@ -168,8 +168,8 @@ async function onMolfileTextareaDrop(event) {
   }
 
   // make sure we only insert V3000 Molfiles
-  const lines = content.match(/[^\r\n]+/g);
-  if (lines.length < 3 || !lines[2].endsWith("V3000")) {
+  const lines = content.split(/\r?\n/);
+  if (lines.length < 4 || !lines[3].endsWith("V3000")) {
     writeLog("Drag-and-drop: You may only drag-and-drop V3000 Molfiles.")
     return;
   }
