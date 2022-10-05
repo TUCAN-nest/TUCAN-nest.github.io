@@ -1,6 +1,7 @@
 "use strict";
 
 function onBodyLoad() {
+  clearLog();
   writeLog("Loading Pyodide and the TUCAN package. This may take a few seconds ...");
 }
 
@@ -21,6 +22,7 @@ function onKetcher1Loaded() {
 
 function onChangeInKetcher1() {
   if (getKetcher("ketcher1").editor.struct().isBlank()) {
+    clearLog();
     writeResult("", "tucanFromEditor");
   }
 }
@@ -91,55 +93,90 @@ function onFinishLoad() {
   document.getElementById("btnConvertMolfileFromTextarea").disabled = false;
   document.getElementById("btnConvertTucanToMolfileInEditor").disabled = false;
   document.getElementById("btnConvertTucanToMolfileInTextarea").disabled = false;
+  clearLog();
   writeLog("Python environment was loaded. Have fun with TUCAN!");
 }
 
 async function convertMolfileFromEditor() {
   document.getElementById("btnConvertMolfileFromEditor").disabled = true;
-  molfileToTucan(await getMolfileFromKetcher1(), "tucanFromEditor");
+
+  try {
+    clearLog();
+    writeResult("", "tucanFromEditor");
+
+    const tucan = await molfileToTucan(getMolfileFromKetcher1());
+
+    writeResult(tucan, "tucanFromEditor");
+    writeLog("TUCAN successfully generated from drawn structure.");
+  } catch (e) {
+    writeLog("An error occured during the serialization to TUCAN - this might be due to an incorrect Molfile:\n" + e);
+  }
+
   document.getElementById("btnConvertMolfileFromEditor").disabled = false;
 }
 
 async function convertMolfileFromTextarea() {
   document.getElementById("btnConvertMolfileFromTextarea").disabled = true;
-  molfileToTucan(Promise.resolve(document.getElementById("molfileTextarea").value), "tucanFromMolfile");
+
+  try {
+    clearLog();
+    writeResult("", "tucanFromMolfile");
+
+    const tucan = await molfileToTucan(Promise.resolve(document.getElementById("molfileTextarea").value));
+
+    writeResult(tucan, "tucanFromMolfile");
+    writeLog("TUCAN successfully generated from Molfile.");
+  } catch (e) {
+    writeLog("An error occured during the serialization to TUCAN. This might be due to an incorrect Molfile. Error:\n" + e);
+  }
+
   document.getElementById("btnConvertMolfileFromTextarea").disabled = false;
 }
 
-async function molfileToTucan(molfilePromise, outputPreId) {
-  writeResult("", outputPreId);
+async function molfileToTucan(molfilePromise) {
   const [molfile_to_tucan] = await tucanwebPyPromise;
-  try {
-    const tucan = molfile_to_tucan(await molfilePromise);
-    writeResult(tucan, outputPreId);
-  } catch (e) {
-    console.error(e);
-    writeLog("An error occured during the serialization to TUCAN. This might be due to an incorrect Molfile. Check your browser console (F12) for details.");
-  }
+  return molfile_to_tucan(await molfilePromise);
 }
 
 async function convertTucanToMolfileInEditor() {
   document.getElementById("btnConvertTucanToMolfileInEditor").disabled = true;
-  clearKetcher2();
-  await tucanToMolfile(document.getElementById("tucanTextarea1").value, async(molfile) => await setMoleculeInKetcher2(molfile));
+
+  try {
+    clearLog();
+    clearKetcher2();
+
+    const molfile = await tucanToMolfile(document.getElementById("tucanTextarea1").value);
+
+    await setMoleculeInKetcher2(molfile);
+    writeLog("Molfile successfully generated from TUCAN");
+  } catch (e) {
+    writeLog("An error occured during the conversion to Molfile. This might be due to an incorrect TUCAN string. Error:\n" + e);
+  }
+
   document.getElementById("btnConvertTucanToMolfileInEditor").disabled = false;
 }
 
 async function convertTucanToMolfileInTextarea() {
   document.getElementById("btnConvertTucanToMolfileInTextarea").disabled = true;
-  tucanToMolfile(document.getElementById("tucanTextarea2").value, molfile => writeResult(molfile, "molfileFromTucan"));
+
+  try {
+    clearLog();
+    writeResult("", "molfileFromTucan");
+
+    const molfile = await tucanToMolfile(document.getElementById("tucanTextarea2").value)
+
+    writeResult(molfile, "molfileFromTucan");
+    writeLog("Molfile successfully generated from TUCAN");
+  } catch (e) {
+    writeLog("An error occured during the conversion to Molfile. This might be due to an incorrect TUCAN string. Error:\n" + e);
+  }
+
   document.getElementById("btnConvertTucanToMolfileInTextarea").disabled = false;
 }
 
-async function tucanToMolfile(tucan, action) {
+async function tucanToMolfile(tucan) {
   const [, tucan_to_molfile] = await tucanwebPyPromise;
-  try {
-    const molfile = tucan_to_molfile(tucan);
-    await action(molfile);
-  } catch (e) {
-    console.error(e);
-    writeLog("An error occured during the conversion to Molfile. This might be due to an incorrect TUCAN string. Check your browser console (F12) for details.");
-  }
+  return tucan_to_molfile(tucan);
 }
 
 function writeResult(text, id) {
@@ -147,7 +184,16 @@ function writeResult(text, id) {
 }
 
 function writeLog(text) {
-  document.getElementById("log").innerHTML = new Date().toLocaleTimeString() + ": " + text;
+  const logText = new Date().toLocaleTimeString() + ": " + text;
+
+  // escape HTML tags
+  const textNode = document.createTextNode(logText);
+
+  document.getElementById("log").appendChild(textNode);
+}
+
+function clearLog() {
+  document.getElementById("log").innerHTML = "";
 }
 
 tucanwebPyPromise.then(() => onFinishLoad());

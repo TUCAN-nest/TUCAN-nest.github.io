@@ -62,7 +62,7 @@
             <div class="col-lg-8">
               <div class="w-100" style="display:inline-block;position:relative;">
                 <textarea id="molfileTextarea" class="form-control pe-5" style="height:450px;resize:none;" placeholder="Paste or drag-and-drop a Molfile V3000 here" ondragover="onTextareaDragover(event)" ondrop="onMolfileTextareaDrop(event)"></textarea>
-                <button class="btn btn-outline-secondary border-0" style="position:absolute;top:10px;right:10px;" onclick="document.getElementById('molfileTextarea').value = '';writeResult('', 'tucanFromMolfile')"><i class="bi bi-trash"></i></button>
+                <button class="btn btn-outline-secondary border-0" style="position:absolute;top:10px;right:10px;" onclick="document.getElementById('molfileTextarea').value = '';writeResult('', 'tucanFromMolfile');clearLog();"><i class="bi bi-trash"></i></button>
               </div>
             </div>
             <div class="col-lg-4 mt-auto">
@@ -82,7 +82,7 @@
             <div class="col-lg-8">
               <div class="w-100" style="display:inline-block;position:relative;">
                 <textarea id="tucanTextarea1" class="form-control pe-5" style="height:150px;resize:none;" placeholder="Paste or drag-and-drop a TUCAN here"></textarea>
-                <button class="btn btn-outline-secondary border-0" style="position:absolute;top:10px;right:10px;" onclick="document.getElementById('tucanTextarea1').value = '';clearKetcher2()"><i class="bi bi-trash"></i></button>
+                <button class="btn btn-outline-secondary border-0" style="position:absolute;top:10px;right:10px;" onclick="document.getElementById('tucanTextarea1').value = '';clearKetcher2();clearLog();"><i class="bi bi-trash"></i></button>
               </div>
             </div>
             <div class="col-lg-4 mt-auto">
@@ -101,7 +101,7 @@
             <div class="col-lg-8">
               <div class="w-100" style="display:inline-block;position:relative;">
                 <textarea id="tucanTextarea2" class="form-control pe-5" style="height:150px;resize:none;" placeholder="Paste or drag-and-drop a TUCAN here"></textarea>
-                <button class="btn btn-outline-secondary border-0" style="position:absolute;top:10px;right:10px;" onclick="document.getElementById('tucanTextarea2').value = '';writeResult('', 'molfileFromTucan')"><i class="bi bi-trash"></i></button>
+                <button class="btn btn-outline-secondary border-0" style="position:absolute;top:10px;right:10px;" onclick="document.getElementById('tucanTextarea2').value = '';writeResult('', 'molfileFromTucan');clearLog();"><i class="bi bi-trash"></i></button>
               </div>
             </div>
             <div class="col-lg-4 mt-auto">
