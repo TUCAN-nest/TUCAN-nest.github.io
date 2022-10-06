@@ -90,6 +90,10 @@
               </div>
             </div>
             <div class="col-lg-4 mt-auto">
+              <div class="form-check mb-3">
+                <input id="calcCoordinatesCheckbox1" class="form-check-input" type="checkbox" value="">
+                <label class="form-check-label" for="calcCoordinatesCheckbox1">Calculate atom coordinates</label>
+              </div>
               <button id="btnConvertTucanToMolfileInEditor" class="btn btn-outline-secondary" onclick="convertTucanToMolfileInEditor()" disabled="true">Convert and draw structure</button>
             </div>
           </div>
@@ -111,6 +115,10 @@
               </div>
             </div>
             <div class="col-lg-4 mt-auto">
+              <div class="form-check mb-3">
+                <input id="calcCoordinatesCheckbox2" class="form-check-input" type="checkbox" value="">
+                <label class="form-check-label" for="calcCoordinatesCheckbox2">Calculate atom coordinates</label>
+              </div>
               <button id="btnConvertTucanToMolfileInTextarea" class="btn btn-outline-secondary" onclick="convertTucanToMolfileInTextarea()" disabled="true">Convert to Molfile</button>
             </div>
           </div>
@@ -121,7 +129,6 @@
             <pre id="molfileFromTucan" class="py-3 px-3 mb-0" style="white-space:pre-wrap;user-select:all;"></pre>
           </div>
         </div>
-
       </div>
 
       <div class="row mt-3 border rounded bg-light" style="--bs-bg-opacity:.3;">

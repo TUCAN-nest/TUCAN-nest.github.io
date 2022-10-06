@@ -22,10 +22,10 @@ def molfile_to_tucan(molfile):
   return to_js(result)
 
 
-def tucan_to_molfile(tucan):
+def tucan_to_molfile(tucan, calc_coordinates):
   result = ""
   if tucan:
-    result = graph_to_molfile(graph_from_tucan(tucan))
+    result = graph_to_molfile(graph_from_tucan(tucan), calc_coordinates)
 
   return to_js(result)
 

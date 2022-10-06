@@ -66,6 +66,7 @@ async function startPyodide() {
 
   const packages = [
     "networkx",
+    "scipy",
     "dist/igraph-0.9.11-cp310-cp310-emscripten_3_1_14_wasm32.whl",
     "dist/tucan-0.1.0-py2.py3-none-any.whl"
   ];
@@ -145,7 +146,7 @@ async function convertTucanToMolfileInEditor() {
     clearLog();
     clearKetcher2();
 
-    const molfile = await tucanToMolfile(document.getElementById("tucanTextarea1").value);
+    const molfile = await tucanToMolfile(document.getElementById("tucanTextarea1").value, document.getElementById("calcCoordinatesCheckbox1").checked);
 
     await setMoleculeInKetcher2(molfile);
     writeLog("Molfile successfully generated from TUCAN");
@@ -163,7 +164,7 @@ async function convertTucanToMolfileInTextarea() {
     clearLog();
     writeResult("", "molfileFromTucan");
 
-    const molfile = await tucanToMolfile(document.getElementById("tucanTextarea2").value)
+    const molfile = await tucanToMolfile(document.getElementById("tucanTextarea2").value, document.getElementById("calcCoordinatesCheckbox2").checked)
 
     writeResult(molfile, "molfileFromTucan");
     writeLog("Molfile successfully generated from TUCAN");
@@ -174,9 +175,9 @@ async function convertTucanToMolfileInTextarea() {
   document.getElementById("btnConvertTucanToMolfileInTextarea").disabled = false;
 }
 
-async function tucanToMolfile(tucan) {
+async function tucanToMolfile(tucan, calcCoordinates) {
   const [, tucan_to_molfile] = await tucanwebPyPromise;
-  return tucan_to_molfile(tucan);
+  return tucan_to_molfile(tucan, calcCoordinates);
 }
 
 function writeResult(text, id) {
