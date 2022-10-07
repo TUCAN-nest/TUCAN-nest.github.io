@@ -146,7 +146,7 @@ async function convertTucanToMolfileInEditor() {
     clearLog();
     clearKetcher2();
 
-    const molfile = await tucanToMolfile(document.getElementById("tucanTextarea1").value, document.getElementById("calcCoordinatesCheckbox1").checked);
+    const molfile = await tucanToMolfile(document.getElementById("tucanTextarea1").value, false);
 
     await setMoleculeInKetcher2(molfile);
     writeLog("Molfile successfully generated from TUCAN");
@@ -164,7 +164,7 @@ async function convertTucanToMolfileInTextarea() {
     clearLog();
     writeResult("", "molfileFromTucan");
 
-    const molfile = await tucanToMolfile(document.getElementById("tucanTextarea2").value, document.getElementById("calcCoordinatesCheckbox2").checked)
+    const molfile = await tucanToMolfile(document.getElementById("tucanTextarea2").value, document.getElementById("calcCoordinatesCheckbox").checked)
 
     writeResult(molfile, "molfileFromTucan");
     writeLog("Molfile successfully generated from TUCAN");
