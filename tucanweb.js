@@ -1,32 +1,34 @@
 "use strict";
 
 function onBodyLoad() {
+  clearLog();
   writeLog("Loading Pyodide and the TUCAN package. This may take a few seconds ...");
 }
 
-function getKetcher() {
-  return document.getElementById("ketcher").contentWindow.ketcher;
+function getKetcher(id) {
+  return document.getElementById(id).contentWindow.ketcher;
 }
 
-function onKetcherLoaded() {
+function onKetcher1Loaded() {
   // Chrome fires the onload event too early, so we might need to wait until 'ketcher' exists.
-  const ketcher = getKetcher();
+  const ketcher = getKetcher("ketcher1");
   if (ketcher) {
-    ketcher.editor.subscribe("change", data => onChangeInKetcher());
-    ketcher.editor.options({"showHydrogenLabels":"Hetero"});
+    ketcher.editor.subscribe("change", data => onChangeInKetcher1());
+    ketcher.editor.options({"showHydrogenLabels":"off"});
   } else {
-    setTimeout(() => onKetcherLoaded(), 0);
+    setTimeout(() => onKetcher1Loaded(), 0);
   }
 }
 
-function onChangeInKetcher() {
-  if (getKetcher().editor.struct().isBlank()) {
-    writeTucan("", "tucanFromEditor");
+function onChangeInKetcher1() {
+  if (getKetcher("ketcher1").editor.struct().isBlank()) {
+    clearLog();
+    writeResult("", "tucanFromEditor");
   }
 }
 
-async function getMolfileFromKetcher() {
-  let molfile = await getKetcher().getMolfile("v3000");
+async function getMolfileFromKetcher1() {
+  let molfile = await getKetcher("ketcher1").getMolfile("v3000");
   if (document.getElementById("addImplicitHydrogensCheckbox").checked) {
     molfile = addHsToMolfile(molfile);
   }
@@ -39,14 +41,32 @@ function addHsToMolfile(molfile) {
   return molObj.toMolfileV3();
 }
 
+function onKetcher2Loaded() {
+  const ketcher = getKetcher("ketcher2");
+  if (ketcher) {
+    ketcher.editor.options({"showHydrogenLabels":"off"});
+  } else {
+    setTimeout(() => onKetcher2Loaded(), 0);
+  }
+}
+
+async function setMoleculeInKetcher2(molfile) {
+  await getKetcher("ketcher2").setMolecule(molfile);
+}
+
+function clearKetcher2() {
+  getKetcher("ketcher2").editor.clear();
+}
+
 async function startPyodide() {
   const pyodide = await loadPyodide();
   await pyodide.loadPackage("micropip");
   const micropip = pyodide.pyimport("micropip");
-  await micropip.install("texttable");
+  await micropip.install(["texttable", "antlr4-python3-runtime==4.11.1"]);
 
   const packages = [
     "networkx",
+    "scipy",
     "dist/igraph-0.9.11-cp310-cp310-emscripten_3_1_14_wasm32.whl",
     "dist/tucan-0.1.0-py2.py3-none-any.whl"
   ];
@@ -63,51 +83,130 @@ async function loadTucanwebPy() {
   return pyodide.runPythonAsync(code);
 }
 
-var molfile_to_tucanPromise = loadTucanwebPy();
+var tucanwebPyPromise = loadTucanwebPy();
 
 function reloadTucanwebPy() {
-  molfile_to_tucanPromise = loadTucanwebPy();
+  tucanwebPyPromise = loadTucanwebPy();
 }
 
 function onFinishLoad() {
-  document.getElementById("btnConvertEditor").disabled = false;
-  document.getElementById("btnConvertMolfile").disabled = false;
+  document.getElementById("btnConvertMolfileFromEditor").disabled = false;
+  document.getElementById("btnConvertMolfileFromTextarea").disabled = false;
+  document.getElementById("btnConvertTucanToMolfileInEditor").disabled = false;
+  document.getElementById("btnConvertTucanToMolfileInTextarea").disabled = false;
+  clearLog();
   writeLog("Python environment was loaded. Have fun with TUCAN!");
 }
 
-async function convertFromEditor() {
-  document.getElementById("btnConvertEditor").disabled = true;
-  convertToTucan(await getMolfileFromKetcher(), "tucanFromEditor");
-  document.getElementById("btnConvertEditor").disabled = false;
-}
+async function convertMolfileFromEditor() {
+  document.getElementById("btnConvertMolfileFromEditor").disabled = true;
 
-async function convertFromTextarea() {
-  document.getElementById("btnConvertMolfile").disabled = true;
-  convertToTucan(Promise.resolve(document.getElementById("textarea").value), "tucanFromMolfile")
-  document.getElementById("btnConvertMolfile").disabled = false;
-}
-
-async function convertToTucan(molfilePromise, outputPreId) {
-  writeTucan("", outputPreId);
-  const molfile_to_tucan = await molfile_to_tucanPromise;
   try {
-    const tucan = molfile_to_tucan(await molfilePromise);
-    writeTucan(tucan, outputPreId);
+    clearLog();
+    writeResult("", "tucanFromEditor");
+
+    const tucan = await molfileToTucan(getMolfileFromKetcher1());
+
+    writeResult(tucan, "tucanFromEditor");
+    writeLog("TUCAN successfully generated from drawn structure.");
   } catch (e) {
-    console.error(e);
-    writeLog("An error occured during the serialization to TUCAN. This might be due to an incorrect Molfile. Check your browser console (F12) for details.");
+    writeLog("An error occured during the serialization to TUCAN - this might be due to an incorrect Molfile:\n" + e);
   }
+
+  document.getElementById("btnConvertMolfileFromEditor").disabled = false;
 }
 
-function writeTucan(tucan, id) {
-  document.getElementById(id).innerHTML = tucan;
+async function convertMolfileFromTextarea() {
+  document.getElementById("btnConvertMolfileFromTextarea").disabled = true;
+
+  try {
+    clearLog();
+    writeResult("", "tucanFromMolfile");
+
+    const tucan = await molfileToTucan(Promise.resolve(document.getElementById("molfileTextarea").value));
+
+    writeResult(tucan, "tucanFromMolfile");
+    writeLog("TUCAN successfully generated from Molfile.");
+  } catch (e) {
+    writeLog("An error occured during the serialization to TUCAN. This might be due to an incorrect Molfile. Error:\n" + e);
+  }
+
+  document.getElementById("btnConvertMolfileFromTextarea").disabled = false;
+}
+
+async function molfileToTucan(molfilePromise) {
+  const [molfile_to_tucan] = await tucanwebPyPromise;
+  return molfile_to_tucan(await molfilePromise);
+}
+
+async function convertTucanToMolfileInEditor() {
+  document.getElementById("btnConvertTucanToMolfileInEditor").disabled = true;
+
+  try {
+    clearLog();
+    clearKetcher2();
+    document.getElementById("nonCanonicalTucanAlert1").hidden = true;
+
+    const tucan = document.getElementById("tucanTextarea1").value;
+
+    const [molfile, isCanonical] = await tucanToMolfile(tucan, false);
+
+    document.getElementById("nonCanonicalTucanAlert1").hidden = isCanonical;
+    await setMoleculeInKetcher2(molfile);
+    writeLog("Molfile successfully generated from TUCAN");
+  } catch (e) {
+    writeLog("An error occured during the conversion to Molfile. This might be due to an incorrect TUCAN string. Error:\n" + e);
+  }
+
+  document.getElementById("btnConvertTucanToMolfileInEditor").disabled = false;
+}
+
+async function convertTucanToMolfileInTextarea() {
+  document.getElementById("btnConvertTucanToMolfileInTextarea").disabled = true;
+
+  try {
+    clearLog();
+    writeResult("", "molfileFromTucan");
+    document.getElementById("nonCanonicalTucanAlert2").hidden = true;
+
+    const tucan = document.getElementById("tucanTextarea2").value;
+    const calcCoordinates = document.getElementById("calcCoordinatesCheckbox").checked;
+
+    const [molfile, isCanonical] = await tucanToMolfile(tucan, calcCoordinates)
+
+    document.getElementById("nonCanonicalTucanAlert2").hidden = isCanonical;
+    writeResult(molfile, "molfileFromTucan");
+    writeLog("Molfile successfully generated from TUCAN");
+  } catch (e) {
+    writeLog("An error occured during the conversion to Molfile. This might be due to an incorrect TUCAN string. Error:\n" + e);
+  }
+
+  document.getElementById("btnConvertTucanToMolfileInTextarea").disabled = false;
+}
+
+async function tucanToMolfile(tucan, calcCoordinates) {
+  const [, tucan_to_molfile] = await tucanwebPyPromise;
+  return tucan_to_molfile(tucan, calcCoordinates);
+}
+
+function writeResult(text, id) {
+  document.getElementById(id).innerHTML = text;
 }
 
 function writeLog(text) {
-  document.getElementById("log").innerHTML = new Date().toLocaleTimeString() + ": " + text;
+  const logText = new Date().toLocaleTimeString() + ": " + text;
+
+  // escape HTML tags
+  const textNode = document.createTextNode(logText);
+
+  document.getElementById("log").appendChild(textNode);
 }
 
-molfile_to_tucanPromise.then(() => onFinishLoad());
+function clearLog() {
+  document.getElementById("log").innerHTML = "";
+}
+
+tucanwebPyPromise.then(() => onFinishLoad());
 
 function onTextareaDragover(event) {
   event.stopPropagation();
@@ -115,7 +214,7 @@ function onTextareaDragover(event) {
   event.dataTransfer.dropEffect = 'copy';
 }
 
-async function onTextareaDrop(event) {
+async function onMolfileTextareaDrop(event) {
   event.stopPropagation();
   event.preventDefault();
 
@@ -125,13 +224,13 @@ async function onTextareaDrop(event) {
   }
 
   // make sure we only insert V3000 Molfiles
-  const lines = content.match(/[^\r\n]+/g);
-  if (lines.length < 3 || !lines[2].endsWith("V3000")) {
+  const lines = content.split(/\r?\n/);
+  if (lines.length < 4 || !lines[3].endsWith("V3000")) {
     writeLog("Drag-and-drop: You may only drag-and-drop V3000 Molfiles.")
     return;
   }
 
-  document.getElementById("textarea").value = content;
+  document.getElementById("molfileTextarea").value = content;
 }
 
 async function extractContent(dataTransfer) {
