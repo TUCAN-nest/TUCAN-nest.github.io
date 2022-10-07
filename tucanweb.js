@@ -145,9 +145,13 @@ async function convertTucanToMolfileInEditor() {
   try {
     clearLog();
     clearKetcher2();
+    document.getElementById("nonCanonicalTucanAlert1").hidden = true;
 
-    const molfile = await tucanToMolfile(document.getElementById("tucanTextarea1").value, false);
+    const tucan = document.getElementById("tucanTextarea1").value;
 
+    const [molfile, isCanonical] = await tucanToMolfile(tucan, false);
+
+    document.getElementById("nonCanonicalTucanAlert1").hidden = isCanonical;
     await setMoleculeInKetcher2(molfile);
     writeLog("Molfile successfully generated from TUCAN");
   } catch (e) {
@@ -163,9 +167,14 @@ async function convertTucanToMolfileInTextarea() {
   try {
     clearLog();
     writeResult("", "molfileFromTucan");
+    document.getElementById("nonCanonicalTucanAlert2").hidden = true;
 
-    const molfile = await tucanToMolfile(document.getElementById("tucanTextarea2").value, document.getElementById("calcCoordinatesCheckbox").checked)
+    const tucan = document.getElementById("tucanTextarea2").value;
+    const calcCoordinates = document.getElementById("calcCoordinatesCheckbox").checked;
 
+    const [molfile, isCanonical] = await tucanToMolfile(tucan, calcCoordinates)
+
+    document.getElementById("nonCanonicalTucanAlert2").hidden = isCanonical;
     writeResult(molfile, "molfileFromTucan");
     writeLog("Molfile successfully generated from TUCAN");
   } catch (e) {
