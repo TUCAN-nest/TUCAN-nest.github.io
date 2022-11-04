@@ -143,15 +143,22 @@ async function convertTucanToMolfileInEditor() {
   document.getElementById("btnConvertTucanToMolfileInEditor").disabled = true;
 
   try {
+    // clear outputs
     clearLog();
     clearKetcher2();
     document.getElementById("nonCanonicalTucanAlert1").hidden = true;
 
+    // get necessary data
     const tucan = document.getElementById("tucanTextarea1").value;
 
-    const [molfile, isCanonical] = await tucanToMolfile(tucan, false);
+    // transform data
+    const [molfile, canonicalTucan] = await tucanToMolfile(tucan, false);
 
-    document.getElementById("nonCanonicalTucanAlert1").hidden = isCanonical;
+    // fill outputs
+    if (tucan !== canonicalTucan) {
+        document.getElementById("nonCanonicalTucanAlert1").hidden = false;
+        document.getElementById("canonicalTucan1").innerHTML = canonicalTucan;
+    }
     await setMoleculeInKetcher2(molfile);
     writeLog("Molfile successfully generated from TUCAN");
   } catch (e) {
@@ -165,16 +172,23 @@ async function convertTucanToMolfileInTextarea() {
   document.getElementById("btnConvertTucanToMolfileInTextarea").disabled = true;
 
   try {
+    // clear outputs
     clearLog();
     writeResult("", "molfileFromTucan");
     document.getElementById("nonCanonicalTucanAlert2").hidden = true;
 
+    // get necessary data
     const tucan = document.getElementById("tucanTextarea2").value;
     const calcCoordinates = document.getElementById("calcCoordinatesCheckbox").checked;
 
-    const [molfile, isCanonical] = await tucanToMolfile(tucan, calcCoordinates)
+    // transform data
+    const [molfile, canonicalTucan] = await tucanToMolfile(tucan, calcCoordinates)
 
-    document.getElementById("nonCanonicalTucanAlert2").hidden = isCanonical;
+    // fill outputs
+    if (tucan !== canonicalTucan) {
+        document.getElementById("nonCanonicalTucanAlert2").hidden = false;
+        document.getElementById("canonicalTucan2").innerHTML = canonicalTucan;
+    }
     writeResult(molfile, "molfileFromTucan");
     writeLog("Molfile successfully generated from TUCAN");
   } catch (e) {

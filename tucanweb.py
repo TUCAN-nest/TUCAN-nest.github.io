@@ -24,14 +24,14 @@ def molfile_to_tucan(molfile):
 
 def tucan_to_molfile(tucan, calc_coordinates):
   molfile = ""
-  is_canonical = True
+  canonical_tucan = ""
 
   if tucan:
     graph = graph_from_tucan(tucan)
     molfile = graph_to_molfile(graph, calc_coordinates)
-    is_canonical = tucan == serialize(graph)
+    canonical_tucan = serialize(graph)
 
-  return to_js((molfile, is_canonical))
+  return to_js((molfile, canonical_tucan))
 
 
 molfile_to_tucan, tucan_to_molfile
