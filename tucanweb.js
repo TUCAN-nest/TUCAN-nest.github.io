@@ -149,7 +149,7 @@ async function convertTucanToMolfileInEditor() {
     document.getElementById("nonCanonicalTucanAlert1").hidden = true;
 
     // get necessary data
-    const tucan = document.getElementById("tucanTextarea1").value;
+    const tucan = document.getElementById("tucanTextarea1").value.trim();
 
     // transform data
     const [molfile, canonicalTucan] = await tucanToMolfile(tucan, false);
@@ -178,7 +178,7 @@ async function convertTucanToMolfileInTextarea() {
     document.getElementById("nonCanonicalTucanAlert2").hidden = true;
 
     // get necessary data
-    const tucan = document.getElementById("tucanTextarea2").value;
+    const tucan = document.getElementById("tucanTextarea2").value.trim();
     const calcCoordinates = document.getElementById("calcCoordinatesCheckbox").checked;
 
     // transform data
