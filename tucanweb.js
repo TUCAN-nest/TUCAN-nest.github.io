@@ -94,6 +94,7 @@ function onFinishLoad() {
   document.getElementById("btnConvertMolfileFromTextarea").disabled = false;
   document.getElementById("btnConvertTucanToMolfileInEditor").disabled = false;
   document.getElementById("btnConvertTucanToMolfileInTextarea").disabled = false;
+  document.getElementById("btnConvertTucanToCanonicalTucan").disabled = false;
   clearLog();
   writeLog("Python environment was loaded. Have fun with TUCAN!");
 }
@@ -201,6 +202,34 @@ async function convertTucanToMolfileInTextarea() {
 async function tucanToMolfile(tucan, calcCoordinates) {
   const [, tucan_to_molfile] = await tucanwebPyPromise;
   return tucan_to_molfile(tucan, calcCoordinates);
+}
+
+async function convertTucanToCanonicalTucan() {
+  document.getElementById("btnConvertTucanToCanonicalTucan").disabled = true;
+
+  try {
+    // clear outputs
+    clearLog();
+    writeResult("", "canonicalTucan");
+    document.getElementById("canonicalTucanAlert").hidden = true;
+
+    // get necessary data
+    const tucan = document.getElementById("tucanTextarea3").value.trim();
+
+    // transform data
+    const [, canonicalTucan] = await tucanToMolfile(tucan, false)
+
+    // fill outputs
+    if (tucan === canonicalTucan) {
+        document.getElementById("canonicalTucanAlert").hidden = false;
+    }
+    writeResult(canonicalTucan, "canonicalTucan");
+    writeLog("Canonical TUCAN successfully generated from TUCAN");
+  } catch (e) {
+    writeLog("An error occured during the conversion to canonical TUCAN. This might be due to an incorrect TUCAN string. Error:\n" + e);
+  }
+
+  document.getElementById("btnConvertTucanToCanonicalTucan").disabled = false;
 }
 
 function writeResult(text, id) {
