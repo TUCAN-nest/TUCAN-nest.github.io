@@ -1,13 +1,16 @@
 {
   "name": "my-app",
   "version": "0.1.0",
+  "homepage": ".",
   "private": true,
   "dependencies": {
-    "ketcher-react": "^2.5.2",
-    "ketcher-standalone": "^1.4.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "web-vitals": "^2.1.4"
+    "ketcher-react": "2.11.0",
+    "ketcher-standalone": "2.11.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "resolutions": {
+    "ketcher-core": "2.11.0"
   },
   "devDependencies": {
     "react-scripts": "5.0.1"

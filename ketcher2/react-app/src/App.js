@@ -3,7 +3,7 @@ import { StandaloneStructServiceProvider } from 'ketcher-standalone'
 import { Editor } from 'ketcher-react'
 
 
-const structServiceProvider = new StandaloneStructServiceProvider()
+const structServiceProvider = new StandaloneStructServiceProvider();
 
 function App() {
   return (
